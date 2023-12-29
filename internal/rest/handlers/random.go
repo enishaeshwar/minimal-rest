@@ -2,27 +2,31 @@ package handlers
 
 import (
 	"fmt"
-	"math/rand"
+	"log/slog"
 	"net/http"
+	"strconv"
 	"strings"
+
+	rand "rest-service/internal/service"
 )
 
 func RandomHandler(w http.ResponseWriter, r *http.Request) {
-	res := randomNumbers(10)
-	fmt.Println(res)
 
-	resS := strings.Trim(strings.Join(strings.Split(fmt.Sprint(res), " "), ","), "[]")
-	fmt.Println(resS)
-
-	w.Write([]byte(resS))
-}
-
-func randomNumbers(n int) []int {
-	r := make([]int, n)
-	for i := 0; i < n; i++ {
-		rand.In
-		r = append(r, rand.Int())
+	n := r.URL.Query().Get("value")
+	val, err := strconv.Atoi(n)
+	if err != nil {
+		slog.Error("Error in handling request", "val", val)
+		w.Write([]byte("error"))
+		return
 	}
 
-	return r
+	res := rand.RandomNumbers(val)
+
+	resS := strings.Trim(
+		strings.Join(
+			strings.Split(fmt.Sprint(res), " "),
+			","),
+		"[]")
+
+	w.Write([]byte(resS))
 }
