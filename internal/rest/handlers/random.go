@@ -7,10 +7,14 @@ import (
 	"strconv"
 	"strings"
 
-	rand "rest-service/internal/service"
+	"rest-service/internal/service/random"
 )
 
-func RandomHandler(w http.ResponseWriter, r *http.Request) {
+type RandomHandler struct {
+	RandSrv *random.Service
+}
+
+func (h *RandomHandler) RandomHandle(w http.ResponseWriter, r *http.Request) {
 
 	n := r.URL.Query().Get("value")
 	val, err := strconv.Atoi(n)
@@ -20,7 +24,7 @@ func RandomHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := rand.RandomNumbers(val)
+	res := h.RandSrv.RandomNumbers(val)
 
 	resS := strings.Trim(
 		strings.Join(
