@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func New() {
+func Init() {
 	lgr := slog.New(
 		slog.NewJSONHandler(os.Stdout,
 			&slog.HandlerOptions{

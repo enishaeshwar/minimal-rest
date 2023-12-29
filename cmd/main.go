@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	logger.New()
+	logger.Init()
 	a := app.New()
 	a.RunHTTPServer()
 }
