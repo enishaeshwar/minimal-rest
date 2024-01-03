@@ -26,8 +26,8 @@ func New() *App {
 }
 
 func (a *App) RunHTTPServer() {
-	hh := handlers.HelloWorldHandler{HelloSrv: helloworld.New()}
-	rh := handlers.RandomHandler{RandSrv: random.New()}
+	hh := handlers.HelloWorldHandler{Service: helloworld.New()}
+	rh := handlers.RandomHandler{Service: random.New()}
 
 	a.registerRoutes(hh, rh)
 

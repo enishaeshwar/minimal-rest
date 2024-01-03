@@ -2,6 +2,7 @@ package random
 
 import (
 	"math/rand"
+	"strconv"
 )
 
 type Service struct{}
@@ -13,27 +14,29 @@ func New() *Service {
 func (s *Service) RandomNumbers(n int) []int {
 	c := make(chan []int)
 
-	var res []int
+	var temp, res []int
 
-	go s.getRand(n, c, "routine1")
-	go s.getRand(n, c, "routine2")
-	go s.getRand(n, c, "routine3")
-	go s.getRand(n, c, "routine4")
-	go s.getRand(n, c, "routine5")
+	for i := 0; i < n; i++ {
+		go s.getRand(n, c, "routine"+strconv.Itoa(n))
+	}
 
-	t1, t2, t3, t4, t5 := <-c, <-c, <-c, <-c, <-c
-
-	res = append(
-		append(
-			append(
-				append(
-					append(res, t1...),
-					t2...),
-				t3...),
-			t4...),
-		t5...)
+	for i := 0; i < n; i++ {
+		temp = <-c
+		res = append(res, temp...)
+	}
 
 	return res
+}
+
+func (s *Service) getNoOfGoRoutines(n int) int {
+	perRoutine := 10
+
+	val := n / perRoutine
+	if val == 0 {
+		return 1
+	}
+
+	return val
 }
 
 func (s *Service) getRand(n int, c chan []int, name string) {

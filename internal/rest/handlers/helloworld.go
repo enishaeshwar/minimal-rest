@@ -8,7 +8,7 @@ import (
 )
 
 type HelloWorldHandler struct {
-	HelloSrv *helloworld.Service
+	Service *helloworld.Service
 }
 
 func (h *HelloWorldHandler) HelloWorldHandle(w http.ResponseWriter, r *http.Request) {
@@ -16,7 +16,7 @@ func (h *HelloWorldHandler) HelloWorldHandle(w http.ResponseWriter, r *http.Requ
 
 	if ctx.Err() == nil {
 		slog.Info("Performing some large calculation")
-		w.Write([]byte(h.HelloSrv.HelloWorld()))
+		w.Write([]byte(h.Service.HelloWorld()))
 	} else {
 		slog.Info("Context cancelled. Not performing large calculation.")
 		return
