@@ -1,36 +1,43 @@
 package handlers
 
 import (
-	"fmt"
+	"encoding/json"
 	"log/slog"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"rest-service/internal/service/random"
 )
 
 type RandomHandler struct {
-	RandSrv *random.Service
+	Service *random.Service
+}
+
+type Response struct {
+	Values []int `json:"values"`
 }
 
 func (h *RandomHandler) RandomHandle(w http.ResponseWriter, r *http.Request) {
 
 	n := r.URL.Query().Get("value")
+
 	val, err := strconv.Atoi(n)
 	if err != nil {
-		slog.Error("Error in handling request", "val", val)
+		slog.Error("Error in handling request", "n", n, "val", val)
 		w.Write([]byte("error"))
 		return
 	}
 
-	res := h.RandSrv.RandomNumbers(val)
+	res := h.Service.RandomNumbers(val)
 
-	resS := strings.Trim(
-		strings.Join(
-			strings.Split(fmt.Sprint(res), " "),
-			","),
-		"[]")
+	//resS := strings.Trim(strings.Join(strings.Split(fmt.Sprint(res), " "), ","), "[]")
 
-	w.Write([]byte(resS))
+	j, _ := json.Marshal(Response{Values: res})
+
+	if _, err := w.Write(j); err != nil {
+		slog.Error(err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
