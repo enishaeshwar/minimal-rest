@@ -15,6 +15,7 @@ type RandomHandler struct {
 
 type Response struct {
 	Values []int `json:"values"`
+	Sum    int   `json:"sum"`
 }
 
 func (h *RandomHandler) RandomHandle(w http.ResponseWriter, r *http.Request) {
@@ -28,11 +29,15 @@ func (h *RandomHandler) RandomHandle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := h.Service.RandomNumbers(val)
+	rsp := h.Service.RandomNumbers(val)
 
 	//resS := strings.Trim(strings.Join(strings.Split(fmt.Sprint(res), " "), ","), "[]")
 
-	j, _ := json.Marshal(Response{Values: res})
+	j, _ := json.Marshal(
+		Response{
+			Values: rsp.Values,
+			Sum:    rsp.Sum,
+		})
 
 	if _, err := w.Write(j); err != nil {
 		slog.Error(err.Error())

@@ -1,42 +1,68 @@
 package random
 
 import (
+	"math"
 	"math/rand"
 	"strconv"
 )
 
+const (
+	PerRoutineCount = 10
+)
+
 type Service struct{}
+
+type goRoutineConfig struct {
+	count     int
+	remainder int
+}
+
+type Result struct {
+	Values []int `json:"values"`
+	Sum    int   `json:"sum"`
+}
 
 func New() *Service {
 	return &Service{}
 }
 
-func (s *Service) RandomNumbers(n int) []int {
+func (s *Service) RandomNumbers(n int) Result {
+	var temp, res []int
 	c := make(chan []int)
 
-	var temp, res []int
+	cfg := s.goRoutineConfig(n)
 
-	for i := 0; i < n; i++ {
-		go s.getRand(n, c, "routine"+strconv.Itoa(n))
+	// start go routines
+	for i := 0; i < cfg.count-1; i++ {
+		go s.getRand(PerRoutineCount, c, "routine_"+strconv.Itoa(i))
 	}
+	// last go routine with remainder
+	go s.getRand(cfg.remainder, c, "routine_"+strconv.Itoa(cfg.count-1))
 
-	for i := 0; i < n; i++ {
+	for i := 0; i < cfg.count; i++ {
 		temp = <-c
 		res = append(res, temp...)
 	}
 
-	return res
+	return Result{
+		Values: res,
+		Sum:    s.sum(res),
+	}
 }
 
-func (s *Service) getNoOfGoRoutines(n int) int {
-	perRoutine := 10
+func (s *Service) goRoutineConfig(n int) goRoutineConfig {
+	var c, r int
 
-	val := n / perRoutine
-	if val == 0 {
-		return 1
+	if c = int(math.Ceil(float64(n) / PerRoutineCount)); c == 0 {
+		c = 1
 	}
 
-	return val
+	r = n % PerRoutineCount
+
+	return goRoutineConfig{
+		count:     c,
+		remainder: r,
+	}
 }
 
 func (s *Service) getRand(n int, c chan []int, name string) {
@@ -46,4 +72,14 @@ func (s *Service) getRand(n int, c chan []int, name string) {
 	}
 
 	c <- res
+}
+
+func (s *Service) sum(arr []int) int {
+	var sum int
+
+	for i := 0; i < len(arr); i++ {
+		sum = sum + arr[i]
+	}
+
+	return sum
 }
